@@ -5,6 +5,11 @@
 #include "io.h"
 #include "altera_up_avalon_video_character_buffer_with_dma.h"
 #include "altera_up_avalon_video_pixel_buffer_dma.h"
+#include <stddef.h>
+#include <string.h>
+#include <stdbool.h>
+#include <stdlib.h>
+#include <unistd.h> //for usleep
 
 
 
@@ -26,11 +31,77 @@
 
 #define MIN_FREQ 45.0 //minimum frequency to draw
 
-#define PRVGADraw_Task_P      (tskIDLE_PRIORITY+1)
+
+//Global variables
+double freq[100], dfreq[100];
+int i = 99;//i here points to the oldest data in freq array
+int j = 0; //j loops through all the data to be drawn on VGA
+
+
+
+//Task priority
+#define PRVGADraw_Task_P 2
+#define StabilityMonitor_Task_P 7
+
+
+
+//Task handler
 TaskHandle_t PRVGADraw;
 
 
+//Queue handler
 static QueueHandle_t Q_freq_data;
+
+
+
+/****** Frequency Analyzer ISR ******/
+void freq_relay(){
+	#define SAMPLING_FREQ 16000.0
+	double temp = SAMPLING_FREQ/(double)IORD(FREQUENCY_ANALYSER_BASE, 0);
+	xQueueSendToBackFromISR( Q_freq_data, &temp, pdFALSE );
+	return;
+}
+/****** Frequency Analyzer ISR END ******/
+
+
+
+
+
+
+/****** Stability Monitor Task ******/
+void stabilityMonitorTask(void *pvParameters){
+
+	while(1){
+		while(uxQueueMessagesWaiting( Q_freq_data ) != 0){
+					xQueueReceive( Q_freq_data, freq+i, 0 );
+
+					//calculate frequency RoC
+
+					if(i==0){
+						dfreq[0] = (freq[0]-freq[99]) * 2.0 * freq[0] * freq[99] / (freq[0]+freq[99]);
+					}
+					else{
+						dfreq[i] = (freq[i]-freq[i-1]) * 2.0 * freq[i]* freq[i-1] / (freq[i]+freq[i-1]);
+					}
+
+					if (dfreq[i] > 100.0){
+						dfreq[i] = 100.0;
+					}
+
+					i =	++i%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
+					printf("%d\n", i);
+					vTaskDelay(10);
+				}
+	}
+}
+/****** Stability Monitor Task END ******/
+
+
+
+
+
+
+/****** VGA display Task******/
 
 typedef struct{
 	unsigned int x1;
@@ -39,11 +110,7 @@ typedef struct{
 	unsigned int y2;
 }Line;
 
-
-/****** VGA display ******/
-
 void PRVGADraw_Task(void *pvParameters ){
-
 
 	//initialize VGA controllers
 	alt_up_pixel_buffer_dma_dev *pixel_buf;
@@ -82,33 +149,9 @@ void PRVGADraw_Task(void *pvParameters ){
 	alt_up_char_buffer_string(char_buf, "-60", 9, 36);
 
 
-	double freq[100], dfreq[100];
-	int i = 99, j = 0;
 	Line line_freq, line_roc;
 
 	while(1){
-
-		//receive frequency data from queue
-		while(uxQueueMessagesWaiting( Q_freq_data ) != 0){
-			xQueueReceive( Q_freq_data, freq+i, 0 );
-
-			//calculate frequency RoC
-
-			if(i==0){
-				dfreq[0] = (freq[0]-freq[99]) * 2.0 * freq[0] * freq[99] / (freq[0]+freq[99]);
-			}
-			else{
-				dfreq[i] = (freq[i]-freq[i-1]) * 2.0 * freq[i]* freq[i-1] / (freq[i]+freq[i-1]);
-			}
-
-			if (dfreq[i] > 100.0){
-				dfreq[i] = 100.0;
-			}
-
-
-			i =	++i%100; //point to the next data (oldest) to be overwritten
-
-		}
 
 		//clear old graph to draw new graph
 		alt_up_pixel_buffer_dma_draw_box(pixel_buf, 101, 0, 639, 199, 0, 0);
@@ -136,19 +179,12 @@ void PRVGADraw_Task(void *pvParameters ){
 				alt_up_pixel_buffer_dma_draw_line(pixel_buf, line_roc.x1, line_roc.y1, line_roc.x2, line_roc.y2, 0x3ff << 0, 0);
 			}
 		}
-		vTaskDelay(10);
+		vTaskDelay(20);
 
 	}
 }
 
-void freq_relay(){
-	#define SAMPLING_FREQ 16000.0
-	double temp = SAMPLING_FREQ/(double)IORD(FREQUENCY_ANALYSER_BASE, 0);
 
-	xQueueSendToBackFromISR( Q_freq_data, &temp, pdFALSE );
-
-	return;
-}
 
 
 
@@ -160,7 +196,7 @@ int main()
 	alt_irq_register(FREQUENCY_ANALYSER_IRQ, 0, freq_relay);
 
 	xTaskCreate( PRVGADraw_Task, "DrawTsk", configMINIMAL_STACK_SIZE, NULL, PRVGADraw_Task_P, &PRVGADraw );
-
+	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", configMINIMAL_STACK_SIZE, NULL, StabilityMonitor_Task_P, NULL);
 
 
 	vTaskStartScheduler();

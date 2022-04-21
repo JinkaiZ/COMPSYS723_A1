@@ -48,8 +48,6 @@ int redLEDArray[5];
 double thresholdFreq = 49;
 double thresholdROC = 60;
 
-bool firstLoadSheeding = true;
-
 state systemState = NORMAL;
 
 
@@ -161,22 +159,18 @@ void stabilityMonitorTask(void *pvParameters){
 					}
 
 					//check the freq&ROC against thresholds
-
-//					xSemaphoreTake(Semaphore, portMAX_DELAY);
+//					xSemaphoreTake(shedSemaphore, portMAX_DELAY);
 					if ((freq[freqIndex] < thresholdFreq) || (abs(dfreq[freqIndex]) > thresholdROC))
 					{
+						printf("not stable \n");
 					systemState = MONITORING;
-
-					//start timer
-
 					}
 					else
 					{
+						printf("stable \n");
 					systemState = NORMAL;
-
-					//start timer
 					}
-//					xSemaphoreGive(Semaphore);
+//					xSemaphoreGive(shedSemaphore);
 
 					if (dfreq[freqIndex] > 100.0){
 						dfreq[freqIndex] = 100.0;
@@ -189,6 +183,27 @@ void stabilityMonitorTask(void *pvParameters){
 }
 /****** Stability Monitor Task END ******/
 
+/****** Load Control Task ******/
+void LoadCtrlTask(void *pvParameters)
+{
+	while(1){
+
+		switch(systemState){
+
+		case NORMAL:
+			printf("The system is in normal state \n");
+			break;
+
+
+		case MONITORING:
+			printf("The system is in normal state \n");
+			break;
+
+		}
+		vTaskDelay(20);
+	}
+}
+/****** Load Control Task END ******/
 
 
 
@@ -296,7 +311,7 @@ int main()
 	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
 	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
 	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
-
+	xTaskCreate( LEDCtrlTask, "LoadCtrlTsk", TASK_STACKSIZE, NULL, LoadCtrl_Task_P, NULL);
 
 
 	vTaskStartScheduler();

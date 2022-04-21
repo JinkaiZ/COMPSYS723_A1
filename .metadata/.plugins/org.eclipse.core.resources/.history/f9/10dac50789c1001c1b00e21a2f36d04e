@@ -173,8 +173,6 @@ void stabilityMonitorTask(void *pvParameters){
 					else
 					{
 					systemState = NORMAL;
-
-					//start timer
 					}
 //					xSemaphoreGive(Semaphore);
 
@@ -189,6 +187,29 @@ void stabilityMonitorTask(void *pvParameters){
 }
 /****** Stability Monitor Task END ******/
 
+/****** Load Control Task ******/
+void LoadCtrlTask(void *pvParameters)
+{
+	while(1){
+
+		switch(systemState){
+
+		case NORMAL:
+			printf("The system is in normal state \n");
+			break;
+
+
+		case MONITORING:
+			printf("The system is in monitoring state \n");
+
+			break;
+
+
+		}
+		vTaskDelay(10);
+	}
+}
+/****** Load Control Task END ******/
 
 
 
@@ -296,7 +317,7 @@ int main()
 	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
 	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
 	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
-
+	xTaskCreate( LoadCtrlTask, "LoadCtrlTsk", TASK_STACKSIZE, NULL, LoadCtrl_Task_P, NULL);
 
 
 	vTaskStartScheduler();

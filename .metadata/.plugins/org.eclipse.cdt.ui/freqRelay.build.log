@@ -1,4 +1,4 @@
-01:19:34 **** Incremental Build of configuration Nios II for project freqRelay ****
+02:20:23 **** Incremental Build of configuration Nios II for project freqRelay ****
 make all 
 Info: Building ../freqRelay_bsp/
 C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-directory -C ../freqRelay_bsp/
@@ -6,9 +6,13 @@ C:/intelFPGA_lite/18.1/nios2eds/bin/gnu/H-x86_64-mingw32/bin/make --no-print-dir
 Info: Compiling main.c to obj/default/main.o
 nios2-elf-gcc -xc -MP -MMD -c -I../freqRelay_bsp//HAL/inc -I../freqRelay_bsp/ -I../freqRelay_bsp//drivers/inc  -pipe -D__hal__ -DALT_NO_INSTRUCTION_EMULATION -DALT_SINGLE_THREADED    -O0 -g -Wall   -mhw-div -mhw-mul -mno-hw-mulx -mgpopt=global  -o obj/default/main.o main.c
 main.c: In function 'stabilityMonitorTask':
-main.c:156:16: warning: operation on 'freqIndex' may be undefined [-Wsequence-point]
+main.c:176:16: warning: operation on 'freqIndex' may be undefined [-Wsequence-point]
       freqIndex = ++freqIndex%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
                 ^
+main.c: In function 'LoadCtrlTask':
+main.c:189:3: warning: enumeration value 'MAINTENANCE' not handled in switch [-Wswitch]
+   switch(systemState){
+   ^
 Info: Linking freqRelay.elf
 nios2-elf-g++  -T'../freqRelay_bsp//linker.x' -msys-crt0='../freqRelay_bsp//obj/HAL/src/crt0.o' -msys-lib=hal_bsp -L../freqRelay_bsp/   -Wl,-Map=freqRelay.map   -O0 -g -Wall   -mhw-div -mhw-mul -mno-hw-mulx -mgpopt=global  -o freqRelay.elf obj/default/FreeRTOS/croutine.o obj/default/FreeRTOS/event_groups.o obj/default/FreeRTOS/heap.o obj/default/FreeRTOS/list.o obj/default/FreeRTOS/port.o obj/default/FreeRTOS/queue.o obj/default/FreeRTOS/tasks.o obj/default/FreeRTOS/timers.o obj/default/main.o obj/default/FreeRTOS/port_asm.o -lm -msys-lib=m
 nios2-elf-insert freqRelay.elf --thread_model hal --cpu_name nios2 --qsys true --simulation_enabled false --id 7 --sidp 0x430f0 --timestamp 1393900972 --stderr_dev jtag_uart --stdin_dev jtag_uart --stdout_dev jtag_uart --sopc_system_name nios2 --quartus_project_dir "C:/Users/zhang/Desktop/COMPSYS_723_A1" --sopcinfo C:/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay_bsp/../../nios2.sopcinfo
@@ -18,5 +22,5 @@ Info: Creating freqRelay.objdump
 nios2-elf-objdump --disassemble --syms --all-header --source freqRelay.elf >freqRelay.objdump
 [freqRelay build complete]
 
-01:19:35 Build Finished (took 1s.709ms)
+02:20:25 Build Finished (took 1s.755ms)
 

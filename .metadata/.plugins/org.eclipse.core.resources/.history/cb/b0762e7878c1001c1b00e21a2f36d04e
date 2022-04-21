@@ -35,7 +35,7 @@
 //State declaration
 typedef enum{
 	NORMAL,
-	MONITORING,
+	SHEDDING,
 	MAINTENANCE
 }state;
 
@@ -45,25 +45,15 @@ double freq[100], dfreq[100];
 int freqIndex = 99;//freqIndex here points to the oldest data in freq array
 int redLEDArray[5];
 
-double thresholdFreq = 49;
-double thresholdROC = 60;
-
-bool firstLoadSheeding = true;
-
-state systemState = NORMAL;
-
 
 
 
 //Task
 #define TASK_STACKSIZE 2048
-
+#define PRVGADraw_Task_P 2
 #define StabilityMonitor_Task_P 7
-#define LoadCtrl_Task_P 6
 #define switchPolling_Task_P 5
 #define LEDCtrl_Task_P 4
-#define PRVGADraw_Task_P 2
-
 
 
 
@@ -76,7 +66,6 @@ static QueueHandle_t Q_freq_data;
 
 //Semaphores
 xSemaphoreHandle ledSemaphore;
-xSemaphoreHandle shedSemaphore;
 
 
 
@@ -160,27 +149,10 @@ void stabilityMonitorTask(void *pvParameters){
 						dfreq[freqIndex] = (freq[freqIndex]-freq[freqIndex-1]) * 2.0 * freq[freqIndex]* freq[freqIndex-1] / (freq[freqIndex]+freq[freqIndex-1]);
 					}
 
-					//check the freq&ROC against thresholds
-
-//					xSemaphoreTake(Semaphore, portMAX_DELAY);
-					if ((freq[freqIndex] < thresholdFreq) || (abs(dfreq[freqIndex]) > thresholdROC))
-					{
-					systemState = MONITORING;
-
-					//start timer
-
-					}
-					else
-					{
-					systemState = NORMAL;
-
-					//start timer
-					}
-//					xSemaphoreGive(Semaphore);
-
 					if (dfreq[freqIndex] > 100.0){
 						dfreq[freqIndex] = 100.0;
 					}
+
 					freqIndex =	++freqIndex%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
 
 					vTaskDelay(10);
@@ -188,7 +160,6 @@ void stabilityMonitorTask(void *pvParameters){
 	}
 }
 /****** Stability Monitor Task END ******/
-
 
 
 
@@ -287,7 +258,6 @@ int main()
 	Q_freq_data = xQueueCreate( 100, sizeof(double) );
 
 	ledSemaphore= xSemaphoreCreateMutex();
-	shedSemaphore = xSemaphoreCreateMutex();
 
 
 	alt_irq_register(FREQUENCY_ANALYSER_IRQ, 0, freq_relay);
@@ -296,8 +266,6 @@ int main()
 	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
 	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
 	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
-
-
 
 	vTaskStartScheduler();
 

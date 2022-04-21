@@ -35,7 +35,7 @@
 //State declaration
 typedef enum{
 	NORMAL,
-	MONITORING,
+	SHEDDING,
 	MAINTENANCE
 }state;
 
@@ -48,8 +48,6 @@ int redLEDArray[5];
 double thresholdFreq = 49;
 double thresholdROC = 60;
 
-bool firstLoadSheeding = true;
-
 state systemState = NORMAL;
 
 
@@ -57,13 +55,10 @@ state systemState = NORMAL;
 
 //Task
 #define TASK_STACKSIZE 2048
-
+#define PRVGADraw_Task_P 2
 #define StabilityMonitor_Task_P 7
-#define LoadCtrl_Task_P 6
 #define switchPolling_Task_P 5
 #define LEDCtrl_Task_P 4
-#define PRVGADraw_Task_P 2
-
 
 
 
@@ -161,22 +156,18 @@ void stabilityMonitorTask(void *pvParameters){
 					}
 
 					//check the freq&ROC against thresholds
-
-//					xSemaphoreTake(Semaphore, portMAX_DELAY);
+					xSemaphoreTake(shedSemaphore, portMAX_DELAY);
 					if ((freq[freqIndex] < thresholdFreq) || (abs(dfreq[freqIndex]) > thresholdROC))
-					{
-					systemState = MONITORING;
+								{
 
-					//start timer
+									systemState = SHEDDING;
+								}
+								else
+								{
 
-					}
-					else
-					{
-					systemState = NORMAL;
-
-					//start timer
-					}
-//					xSemaphoreGive(Semaphore);
+									systemState = NORMAL;
+								}
+					xSemaphoreGive(shedSemaphore);
 
 					if (dfreq[freqIndex] > 100.0){
 						dfreq[freqIndex] = 100.0;
@@ -188,7 +179,6 @@ void stabilityMonitorTask(void *pvParameters){
 	}
 }
 /****** Stability Monitor Task END ******/
-
 
 
 
@@ -296,8 +286,6 @@ int main()
 	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
 	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
 	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
-
-
 
 	vTaskStartScheduler();
 

@@ -108,12 +108,11 @@ void switchPollingTask(void *pvParameters)
 /****** LED Control Task ******/
 void LEDCtrlTask(void *pvParameters) {
 
-
+	int redLED = 0x00;
+	int greenLED = 0x00;
 
 	while (1) {
 		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
-		int redLED = 0x00;
-		int greenLED = 0x00;
 		for (int i = 0; i < 5; i++) {
 
 			if(redLEDArray[i] == 1){

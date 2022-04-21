@@ -12,12 +12,11 @@
 #include <unistd.h>
 
 
-#include <altera_avalon_pio_regs.h>
+
 
 #include "FreeRTOS/FreeRTOS.h"
 #include "FreeRTOS/task.h"
 #include "FreeRTOS/queue.h"
-#include "FreeRTOS/semphr.h"
 
 //For frequency plot
 #define FREQPLT_ORI_X 101		//x axis pixel position at the plot origin
@@ -32,28 +31,17 @@
 
 #define MIN_FREQ 45.0 //minimum frequency to draw
 
-//State declaration
-typedef enum{
-	NORMAL,
-	SHEDDING,
-	MAINTENANCE
-}state;
-
 
 //Global variables
 double freq[100], dfreq[100];
-int freqIndex = 99;//freqIndex here points to the oldest data in freq array
-int redLEDArray[5];
+int i = 99;//i here points to the oldest data in freq array
+int j = 0; //j loops through all the data to be drawn on VGA
 
 
 
-
-//Task
-#define TASK_STACKSIZE 2048
+//Task priority
 #define PRVGADraw_Task_P 2
 #define StabilityMonitor_Task_P 7
-#define switchPolling_Task_P 5
-#define LEDCtrl_Task_P 4
 
 
 
@@ -63,9 +51,6 @@ TaskHandle_t PRVGADraw;
 
 //Queue handler
 static QueueHandle_t Q_freq_data;
-
-//Semaphores
-xSemaphoreHandle ledSemaphore;
 
 
 
@@ -78,59 +63,9 @@ void freq_relay(){
 }
 /****** Frequency Analyzer ISR END ******/
 
-/****** Switch Polling Task ******/
-void switchPollingTask(void *pvParameters)
-{
-	while (1)
-	{
-		int switchState = IORD_ALTERA_AVALON_PIO_DATA(SLIDE_SWITCH_BASE);
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
-			for (int i = 0; i < 5; i++)
-			{
-				if ((switchState & (1 << i)))
-				{
-					redLEDArray[i] = 1;
-
-				}
-				else
-				{
-					redLEDArray[i] = 0;
-				}
-			}
-			xSemaphoreGive(ledSemaphore);
-			vTaskDelay(50);
-		}
-
-	}
-/****** Switch Polling Task END ******/
-
-
-/****** LED Control Task ******/
-void LEDCtrlTask(void *pvParameters) {
 
 
 
-	while (1) {
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
-		int redLED = 0x00;
-		int greenLED = 0x00;
-		for (int i = 0; i < 5; i++) {
-
-			if(redLEDArray[i] == 1){
-				redLED |= (0x1 << i);
-				break;
-			}
-
-			}
-
-
-		IOWR_ALTERA_AVALON_PIO_DATA(RED_LEDS_BASE, redLED);
-		IOWR_ALTERA_AVALON_PIO_DATA(GREEN_LEDS_BASE, greenLED);
-		xSemaphoreGive(ledSemaphore);
-		vTaskDelay(50);
-	}
-}
-/****** LED Control Task END ******/
 
 
 /****** Stability Monitor Task ******/
@@ -138,23 +73,23 @@ void stabilityMonitorTask(void *pvParameters){
 
 	while(1){
 		while(uxQueueMessagesWaiting( Q_freq_data ) != 0){
-					xQueueReceive( Q_freq_data, freq+freqIndex, 0 );
+					xQueueReceive( Q_freq_data, freq+i, 0 );
 
 					//calculate frequency RoC
 
-					if(freqIndex==0){
+					if(i==0){
 						dfreq[0] = (freq[0]-freq[99]) * 2.0 * freq[0] * freq[99] / (freq[0]+freq[99]);
 					}
 					else{
-						dfreq[freqIndex] = (freq[freqIndex]-freq[freqIndex-1]) * 2.0 * freq[freqIndex]* freq[freqIndex-1] / (freq[freqIndex]+freq[freqIndex-1]);
+						dfreq[i] = (freq[i]-freq[i-1]) * 2.0 * freq[i]* freq[i-1] / (freq[i]+freq[i-1]);
 					}
 
-					if (dfreq[freqIndex] > 100.0){
-						dfreq[freqIndex] = 100.0;
+					if (dfreq[i] > 100.0){
+						dfreq[i] = 100.0;
 					}
 
-					freqIndex =	++freqIndex%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
-
+					i =	++i%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
+					printf("%d\n", i);
 					vTaskDelay(10);
 				}
 	}
@@ -222,29 +157,29 @@ void PRVGADraw_Task(void *pvParameters ){
 		alt_up_pixel_buffer_dma_draw_box(pixel_buf, 101, 0, 639, 199, 0, 0);
 		alt_up_pixel_buffer_dma_draw_box(pixel_buf, 101, 201, 639, 299, 0, 0);
 
-		for(int j=0;j<99;++j){ //i here points to the oldest data, j loops through all the data to be drawn on VGA
-			if (((int)(freq[(freqIndex+j)%100]) > MIN_FREQ) && ((int)(freq[(freqIndex+j+1)%100]) > MIN_FREQ)){
+		for(j=0;j<99;++j){ //i here points to the oldest data, j loops through all the data to be drawn on VGA
+			if (((int)(freq[(i+j)%100]) > MIN_FREQ) && ((int)(freq[(i+j+1)%100]) > MIN_FREQ)){
 				//Calculate coordinates of the two data points to draw a line in between
 				//Frequency plot
 				line_freq.x1 = FREQPLT_ORI_X + FREQPLT_GRID_SIZE_X * j;
-				line_freq.y1 = (int)(FREQPLT_ORI_Y - FREQPLT_FREQ_RES * (freq[(freqIndex+j)%100] - MIN_FREQ));
+				line_freq.y1 = (int)(FREQPLT_ORI_Y - FREQPLT_FREQ_RES * (freq[(i+j)%100] - MIN_FREQ));
 
 				line_freq.x2 = FREQPLT_ORI_X + FREQPLT_GRID_SIZE_X * (j + 1);
-				line_freq.y2 = (int)(FREQPLT_ORI_Y - FREQPLT_FREQ_RES * (freq[(freqIndex+j+1)%100] - MIN_FREQ));
+				line_freq.y2 = (int)(FREQPLT_ORI_Y - FREQPLT_FREQ_RES * (freq[(i+j+1)%100] - MIN_FREQ));
 
 				//Frequency RoC plot
 				line_roc.x1 = ROCPLT_ORI_X + ROCPLT_GRID_SIZE_X * j;
-				line_roc.y1 = (int)(ROCPLT_ORI_Y - ROCPLT_ROC_RES * dfreq[(freqIndex+j)%100]);
+				line_roc.y1 = (int)(ROCPLT_ORI_Y - ROCPLT_ROC_RES * dfreq[(i+j)%100]);
 
 				line_roc.x2 = ROCPLT_ORI_X + ROCPLT_GRID_SIZE_X * (j + 1);
-				line_roc.y2 = (int)(ROCPLT_ORI_Y - ROCPLT_ROC_RES * dfreq[(freqIndex+j+1)%100]);
+				line_roc.y2 = (int)(ROCPLT_ORI_Y - ROCPLT_ROC_RES * dfreq[(i+j+1)%100]);
 
 				//Draw
 				alt_up_pixel_buffer_dma_draw_line(pixel_buf, line_freq.x1, line_freq.y1, line_freq.x2, line_freq.y2, 0x3ff << 0, 0);
 				alt_up_pixel_buffer_dma_draw_line(pixel_buf, line_roc.x1, line_roc.y1, line_roc.x2, line_roc.y2, 0x3ff << 0, 0);
 			}
 		}
-		vTaskDelay(10);
+		vTaskDelay(20);
 
 	}
 }
@@ -257,15 +192,12 @@ int main()
 {
 	Q_freq_data = xQueueCreate( 100, sizeof(double) );
 
-	ledSemaphore= xSemaphoreCreateMutex();
-
 
 	alt_irq_register(FREQUENCY_ANALYSER_IRQ, 0, freq_relay);
 
-	xTaskCreate( PRVGADraw_Task, "DrawTsk", TASK_STACKSIZE, NULL, PRVGADraw_Task_P, &PRVGADraw );
-	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
-	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
-	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
+	xTaskCreate( PRVGADraw_Task, "DrawTsk", configMINIMAL_STACK_SIZE, NULL, PRVGADraw_Task_P, &PRVGADraw );
+	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", configMINIMAL_STACK_SIZE, NULL, StabilityMonitor_Task_P, NULL);
+
 
 	vTaskStartScheduler();
 

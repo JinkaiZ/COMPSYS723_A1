@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 
-#include <altera_avalon_pio_regs.h>
+
 
 #include "FreeRTOS/FreeRTOS.h"
 #include "FreeRTOS/task.h"
@@ -43,17 +43,13 @@ typedef enum{
 //Global variables
 double freq[100], dfreq[100];
 int freqIndex = 99;//freqIndex here points to the oldest data in freq array
-int redLEDArray[5];
 
 
 
 
-//Task
-#define TASK_STACKSIZE 2048
+//Task priority
 #define PRVGADraw_Task_P 2
 #define StabilityMonitor_Task_P 7
-#define switchPolling_Task_P 5
-#define LEDCtrl_Task_P 4
 
 
 
@@ -63,9 +59,6 @@ TaskHandle_t PRVGADraw;
 
 //Queue handler
 static QueueHandle_t Q_freq_data;
-
-//Semaphores
-xSemaphoreHandle ledSemaphore;
 
 
 
@@ -78,58 +71,37 @@ void freq_relay(){
 }
 /****** Frequency Analyzer ISR END ******/
 
-/****** Switch Polling Task ******/
-void switchPollingTask(void *pvParameters)
-{
-	while (1)
-	{
-		int switchState = IORD_ALTERA_AVALON_PIO_DATA(SLIDE_SWITCH_BASE);
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
-			for (int i = 0; i < 5; i++)
-			{
-				if ((switchState & (1 << i)))
-				{
-					redLEDArray[i] = 1;
-
-				}
-				else
-				{
-					redLEDArray[i] = 0;
-				}
-			}
-			xSemaphoreGive(ledSemaphore);
-			vTaskDelay(50);
-		}
-
-	}
-/****** Switch Polling Task END ******/
-
 
 /****** LED Control Task ******/
-void LEDCtrlTask(void *pvParameters) {
-
-
+void Task_LED(void *pvParameters) {
+	TickType_t xLastWakeTime;
 
 	while (1) {
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
+		xLastWakeTime = xTaskGetTickCount();
+
 		int redLED = 0x00;
 		int greenLED = 0x00;
-		for (int i = 0; i < 5; i++) {
 
-			if(redLEDArray[i] == 1){
-				redLED |= (0x1 << i);
-				break;
+		ManagedState loadState;
+		for (i = 0; i < LED_COUNT; i++) {
+			loadState = LoadManager_getState(i);
+			switch (loadState) {
+				case ENABLED:
+					redLEDValue |= (0x1 << i);
+					break;
+				case SHED:
+					greenLEDValue |= (0x1 << i);
+					break;
+				default:
+					break;
 			}
+		}
 
-			}
+		IOWR_ALTERA_AVALON_PIO_DATA(RED_LEDS_BASE, redLEDValue);
+		IOWR_ALTERA_AVALON_PIO_DATA(GREEN_LEDS_BASE, greenLEDValue);
 
-
-		IOWR_ALTERA_AVALON_PIO_DATA(RED_LEDS_BASE, redLED);
-		IOWR_ALTERA_AVALON_PIO_DATA(GREEN_LEDS_BASE, greenLED);
-		xSemaphoreGive(ledSemaphore);
-		vTaskDelay(50);
+		vTaskDelayUntil(&xLastWakeTime, xFrequency);
 	}
-}
 /****** LED Control Task END ******/
 
 
@@ -257,15 +229,12 @@ int main()
 {
 	Q_freq_data = xQueueCreate( 100, sizeof(double) );
 
-	ledSemaphore= xSemaphoreCreateMutex();
-
 
 	alt_irq_register(FREQUENCY_ANALYSER_IRQ, 0, freq_relay);
 
-	xTaskCreate( PRVGADraw_Task, "DrawTsk", TASK_STACKSIZE, NULL, PRVGADraw_Task_P, &PRVGADraw );
-	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", TASK_STACKSIZE, NULL, StabilityMonitor_Task_P, NULL);
-	xTaskCreate( switchPollingTask, "SwitchPollingTsk", TASK_STACKSIZE, NULL, switchPolling_Task_P, NULL);
-	xTaskCreate( LEDCtrlTask, "LEDCtrlTsk", TASK_STACKSIZE, NULL, LEDCtrl_Task_P, NULL);
+	xTaskCreate( PRVGADraw_Task, "DrawTsk", configMINIMAL_STACK_SIZE, NULL, PRVGADraw_Task_P, &PRVGADraw );
+	xTaskCreate( stabilityMonitorTask, "StabilityMontitorTsk", configMINIMAL_STACK_SIZE, NULL, StabilityMonitor_Task_P, NULL);
+
 
 	vTaskStartScheduler();
 

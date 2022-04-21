@@ -238,3 +238,139 @@ java.lang.Exception
 
 !ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:04:11.544
 !MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:21:38.652
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:21:41.358
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:34:02.212
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:34:04.805
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:40:13.218
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-21 23:40:15.825
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY org.eclipse.cdt.launch 4 104 2022-04-22 00:59:09.684
+!MESSAGE The Nios II ELF executable does not exist. Please verify that the project freqRelay built successfully.
+!STACK 0
+java.io.FileNotFoundException: ELF file 'freqRelay.elf' not found.
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.getProgramFile(Nios2HardwareLaunchDelegate.java:1232)
+	at org.eclipse.cdt.launch.AbstractCLaunchDelegate.verifyProgramFile(AbstractCLaunchDelegate.java:448)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.initialize(AbstractNios2CLaunchDelegate.java:183)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.launch(AbstractNios2CLaunchDelegate.java:90)
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.launch(Nios2HardwareLaunchDelegate.java:98)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:885)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:739)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1039)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1256)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
+!SUBENTRY 1 org.eclipse.cdt.launch 4 104 2022-04-22 00:59:09.685
+!MESSAGE ELF file 'freqRelay.elf' not found.
+!STACK 0
+java.io.FileNotFoundException: ELF file 'freqRelay.elf' not found.
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.getProgramFile(Nios2HardwareLaunchDelegate.java:1232)
+	at org.eclipse.cdt.launch.AbstractCLaunchDelegate.verifyProgramFile(AbstractCLaunchDelegate.java:448)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.initialize(AbstractNios2CLaunchDelegate.java:183)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.launch(AbstractNios2CLaunchDelegate.java:90)
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.launch(Nios2HardwareLaunchDelegate.java:98)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:885)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:739)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1039)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1256)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
+
+!ENTRY org.eclipse.cdt.launch 4 104 2022-04-22 00:59:17.920
+!MESSAGE The Nios II ELF executable does not exist. Please verify that the project freqRelay built successfully.
+!STACK 0
+java.io.FileNotFoundException: ELF file 'freqRelay.elf' not found.
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.getProgramFile(Nios2HardwareLaunchDelegate.java:1232)
+	at org.eclipse.cdt.launch.AbstractCLaunchDelegate.verifyProgramFile(AbstractCLaunchDelegate.java:448)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.initialize(AbstractNios2CLaunchDelegate.java:183)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.launch(AbstractNios2CLaunchDelegate.java:90)
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.launch(Nios2HardwareLaunchDelegate.java:98)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:885)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:739)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1039)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1256)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
+!SUBENTRY 1 org.eclipse.cdt.launch 4 104 2022-04-22 00:59:17.920
+!MESSAGE ELF file 'freqRelay.elf' not found.
+!STACK 0
+java.io.FileNotFoundException: ELF file 'freqRelay.elf' not found.
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.getProgramFile(Nios2HardwareLaunchDelegate.java:1232)
+	at org.eclipse.cdt.launch.AbstractCLaunchDelegate.verifyProgramFile(AbstractCLaunchDelegate.java:448)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.initialize(AbstractNios2CLaunchDelegate.java:183)
+	at com.altera.sbtgui.launch.hardware.AbstractNios2CLaunchDelegate.launch(AbstractNios2CLaunchDelegate.java:90)
+	at com.altera.sbtgui.launch.hardware.Nios2HardwareLaunchDelegate.launch(Nios2HardwareLaunchDelegate.java:98)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:885)
+	at org.eclipse.debug.internal.core.LaunchConfiguration.launch(LaunchConfiguration.java:739)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin.buildAndLaunch(DebugUIPlugin.java:1039)
+	at org.eclipse.debug.internal.ui.DebugUIPlugin$8.run(DebugUIPlugin.java:1256)
+	at org.eclipse.core.internal.jobs.Worker.run(Worker.java:55)
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:00:29.609
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:00:32.208
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:01:04.144
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:01:04.895
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:01:07.492
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:02:51.651
+!MESSAGE Terminated Launch with connection: 10USB-Blaster on localhost [USB-0]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:02:52.530
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:02:55.119
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:04:15.114
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:04:17.706
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:06:09.097
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:06:11.684
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:10:15.105
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:10:17.707
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:11:35.358
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:11:37.959
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:16:35.333
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:16:37.945
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:19:36.781
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --stop --sidp=0x430f0 --timestamp=1393900972]
+
+!ENTRY com.altera.sbtgui.launch 1 0 2022-04-22 01:19:39.381
+!MESSAGE Executing: [C:/intelfpga_lite/18.1/quartus\bin64\cygwin\bin\bash.exe, -c, nios2-download '--cable=USB-Blaster on localhost [USB-0]' --device=1 --instance=0 --go --sidp=0x430f0 --timestamp=1393900972 /cygdrive/c/Users/zhang/Desktop/COMPSYS_723_A1/software/freqRelay/freqRelay.elf]

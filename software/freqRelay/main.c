@@ -18,6 +18,7 @@
 #include "FreeRTOS/task.h"
 #include "FreeRTOS/queue.h"
 #include "FreeRTOS/semphr.h"
+#include "FreeRTOS/timers.h"
 
 //For frequency plot
 #define FREQPLT_ORI_X 101		//x axis pixel position at the plot origin
@@ -32,6 +33,11 @@
 
 #define MIN_FREQ 45.0 //minimum frequency to draw
 
+//define load status
+#define UNLOAD 0
+#define LOAD 1
+#define MANAGED 2
+
 //State declaration
 typedef enum{
 	NORMAL,
@@ -43,17 +49,21 @@ typedef enum{
 //Global variables
 double freq[100], dfreq[100];
 int freqIndex = 99;//freqIndex here points to the oldest data in freq array
-int redLEDArray[5];
 
 double thresholdFreq = 49;
 double thresholdROC = 60;
 
+int loadState[5];
+int redLED = 0x00;
+int greenLED = 0x00;
+
 bool firstLoadSheeding = true;
+bool isStable = true;
 
 state systemState = NORMAL;
+// Timer handle
 
-
-
+TimerHandle_t timer_500;
 
 //Task
 #define TASK_STACKSIZE 2048
@@ -75,8 +85,9 @@ TaskHandle_t PRVGADraw;
 static QueueHandle_t Q_freq_data;
 
 //Semaphores
-xSemaphoreHandle ledSemaphore;
-xSemaphoreHandle shedSemaphore;
+xSemaphoreHandle loadStateSemaphore;
+xSemaphoreHandle stableSemaphore;
+xSemaphoreHandle ledSignal;
 
 
 
@@ -95,21 +106,23 @@ void switchPollingTask(void *pvParameters)
 	while (1)
 	{
 		int switchState = IORD_ALTERA_AVALON_PIO_DATA(SLIDE_SWITCH_BASE);
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
+
+		xSemaphoreTake(loadStateSemaphore, portMAX_DELAY);
 			for (int i = 0; i < 5; i++)
 			{
 				if ((switchState & (1 << i)))
 				{
-					redLEDArray[i] = 1;
+					loadState[i] = LOAD;
 
 				}
 				else
 				{
-					redLEDArray[i] = 0;
+					loadState[i] = UNLOAD;
 				}
 			}
-			xSemaphoreGive(ledSemaphore);
-			vTaskDelay(50);
+		xSemaphoreGive(loadStateSemaphore);
+		xSemaphoreGive(ledSignal);
+		vTaskDelay(50);
 		}
 
 	}
@@ -120,28 +133,35 @@ void switchPollingTask(void *pvParameters)
 void LEDCtrlTask(void *pvParameters) {
 
 
-
 	while (1) {
-		xSemaphoreTake(ledSemaphore, portMAX_DELAY);
-		int redLED = 0x00;
-		int greenLED = 0x00;
-		for (int i = 0; i < 5; i++) {
 
-			if(redLEDArray[i] == 1){
-				redLED |= (0x1 << i);
-				break;
+		if(xSemaphoreTake(ledSignal, portMAX_DELAY)){
+			redLED = 0x00;
+			greenLED = 0x00;
+
+			for (int i = 0; i < 5; i++) {
+
+				if(loadState[i] == LOAD){
+					redLED |= (0x1 << i);
+
 			}
 
 			}
 
+		}
 
 		IOWR_ALTERA_AVALON_PIO_DATA(RED_LEDS_BASE, redLED);
 		IOWR_ALTERA_AVALON_PIO_DATA(GREEN_LEDS_BASE, greenLED);
-		xSemaphoreGive(ledSemaphore);
+
 		vTaskDelay(50);
 	}
 }
 /****** LED Control Task END ******/
+
+
+void vTimerCallback(xTimerHandle t_timer500){
+
+}
 
 
 /****** Stability Monitor Task ******/
@@ -160,29 +180,29 @@ void stabilityMonitorTask(void *pvParameters){
 						dfreq[freqIndex] = (freq[freqIndex]-freq[freqIndex-1]) * 2.0 * freq[freqIndex]* freq[freqIndex-1] / (freq[freqIndex]+freq[freqIndex-1]);
 					}
 
-					//check the freq&ROC against thresholds
 
-//					xSemaphoreTake(Semaphore, portMAX_DELAY);
+					xSemaphoreTake(stableSemaphore, portMAX_DELAY);
+					//check the freq&ROC against thresholds
 					if ((freq[freqIndex] < thresholdFreq) || (abs(dfreq[freqIndex]) > thresholdROC))
 					{
-					systemState = MONITORING;
 
-					//start timer
-
+						if(systemState == NORMAL){
+							systemState = MONITORING;
+							isStable = false;
+							//start timer
+						}
 					}
 					else
 					{
-					systemState = NORMAL;
+					   isStable = true;
 
-					//start timer
 					}
-//					xSemaphoreGive(Semaphore);
+					xSemaphoreGive(stableSemaphore);
 
 					if (dfreq[freqIndex] > 100.0){
 						dfreq[freqIndex] = 100.0;
 					}
 					freqIndex =	++freqIndex%100; //point to the next data (oldest) to be overwritten(from 0 - 99)
-
 					vTaskDelay(10);
 				}
 	}
@@ -286,8 +306,11 @@ int main()
 {
 	Q_freq_data = xQueueCreate( 100, sizeof(double) );
 
-	ledSemaphore= xSemaphoreCreateMutex();
-	shedSemaphore = xSemaphoreCreateMutex();
+	loadStateSemaphore= xSemaphoreCreateMutex();
+	stableSemaphore = xSemaphoreCreateMutex();
+	vSemaphoreCreateBinary(ledSignal);
+
+	timer_500 = xTimerCreate("Timer 500", 500 , pdTRUE, NULL, vTimerCallback);
 
 
 	alt_irq_register(FREQUENCY_ANALYSER_IRQ, 0, freq_relay);
@@ -305,4 +328,3 @@ int main()
 
   return 0;
 }
-
